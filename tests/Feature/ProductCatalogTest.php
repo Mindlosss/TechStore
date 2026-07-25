@@ -31,6 +31,7 @@ test('authenticated users can view the product catalog', function () {
         ->assertSee('Laptop')
         ->assertSee('Electronics')
         ->assertSee('$1,200.00')
+        ->assertSee(route('products.show', 1), false)
         ->assertSee('referrerpolicy="no-referrer"', false)
         ->assertDontSee('loading="lazy"', false);
 });

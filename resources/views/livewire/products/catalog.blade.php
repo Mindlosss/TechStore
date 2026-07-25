@@ -39,24 +39,26 @@
                     class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
                     wire:key="product-{{ $product['id'] }}"
                 >
-                    <img
-                        class="aspect-square w-full object-cover"
-                        src="{{ $product['images'][0] ?? '' }}"
-                        alt="{{ $product['title'] }}"
-                        referrerpolicy="no-referrer"
-                    >
+                    <a class="block h-full" href="{{ route('products.show', $product['id']) }}" wire:navigate>
+                        <img
+                            class="aspect-square w-full object-cover"
+                            src="{{ $product['images'][0] ?? '' }}"
+                            alt="{{ $product['title'] }}"
+                            referrerpolicy="no-referrer"
+                        >
 
-                    <div class="grid gap-2 p-4">
-                        <flux:badge size="sm" class="w-fit">
-                            {{ $product['category']['name'] }}
-                        </flux:badge>
+                        <div class="grid gap-2 p-4">
+                            <flux:badge size="sm" class="w-fit">
+                                {{ $product['category']['name'] }}
+                            </flux:badge>
 
-                        <flux:heading size="lg">{{ $product['title'] }}</flux:heading>
+                            <flux:heading size="lg">{{ $product['title'] }}</flux:heading>
 
-                        <flux:text class="font-semibold text-zinc-900 dark:text-white">
-                            {{ \Illuminate\Support\Number::currency((float) $product['price'], in: 'USD') }}
-                        </flux:text>
-                    </div>
+                            <flux:text class="font-semibold text-zinc-900 dark:text-white">
+                                {{ \Illuminate\Support\Number::currency((float) $product['price'], in: 'USD') }}
+                            </flux:text>
+                        </div>
+                    </a>
                 </article>
             @endforeach
         </div>
