@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'platzi_store' => [
+        'url' => env('PLATZI_STORE_URL', 'https://api.escuelajs.co/api/v1'),
+    ],
+
 ];
