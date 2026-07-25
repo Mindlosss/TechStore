@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Products;
 
+use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Http;
 use Livewire\Component;
@@ -16,11 +17,55 @@ class Catalog extends Component
         $this->validateOnly('categoryId');
     }
 
+    public function toggleFavorite(int $productId): void
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            abort(403);
+        }
+
+        $favorite = $user->favorites()->where('product_id', $productId)->first();
+
+        if ($favorite !== null) {
+            $favorite->delete();
+
+            return;
+        }
+
+        try {
+            $product = Http::baseUrl((string) config('services.platzi_store.url'))
+                ->acceptJson()
+                ->connectTimeout(3)
+                ->timeout(10)
+                ->retry([100, 300])
+                ->get("products/{$productId}")
+                ->throw()
+                ->json();
+
+            $user->favorites()->create([
+                'product_id' => $product['id'],
+                'title' => $product['title'],
+                'price' => $product['price'],
+                'image' => $product['images'][0] ?? null,
+                'category' => $product['category']['name'],
+            ]);
+        } catch (Throwable $exception) {
+            report($exception);
+            $this->addError('favorite', 'No fue posible actualizar favoritos.');
+        }
+    }
+
     public function render(): View
     {
         $products = [];
         $categories = [];
         $errorMessage = null;
+        $user = auth()->user();
+
+        if (! $user instanceof User) {
+            abort(403);
+        }
 
         try {
             $selectedCategoryId = $this->categoryId === '' ? null : (int) $this->categoryId;
@@ -43,6 +88,7 @@ class Catalog extends Component
             'products' => $products,
             'categories' => $categories,
             'errorMessage' => $errorMessage,
+            'favoriteProductIds' => $user->favorites()->pluck('product_id')->all(),
         ]);
     }
 

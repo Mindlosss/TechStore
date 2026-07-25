@@ -40,6 +40,12 @@
                     <flux:heading size="lg">Descripción</flux:heading>
                     <flux:text>{{ $product['description'] }}</flux:text>
                 </div>
+
+                <flux:error name="favorite" />
+
+                <flux:button wire:click="toggleFavorite">
+                    {{ $isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos' }}
+                </flux:button>
             </div>
         </div>
     @endif

@@ -29,6 +29,8 @@
             No se encontraron productos para esta categoría.
         </flux:callout>
     @else
+        <flux:error name="favorite" />
+
         <div
             class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             wire:loading.class="opacity-50"
@@ -36,10 +38,10 @@
         >
             @foreach ($products as $product)
                 <article
-                    class="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
+                    class="flex flex-col overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-700 dark:bg-zinc-900"
                     wire:key="product-{{ $product['id'] }}"
                 >
-                    <a class="block h-full" href="{{ route('products.show', $product['id']) }}" wire:navigate>
+                    <a class="flex-1" href="{{ route('products.show', $product['id']) }}" wire:navigate>
                         <img
                             class="aspect-square w-full object-cover"
                             src="{{ $product['images'][0] ?? '' }}"
@@ -59,6 +61,12 @@
                             </flux:text>
                         </div>
                     </a>
+
+                    <div class="p-4 pt-0">
+                        <flux:button class="w-full" wire:click="toggleFavorite({{ $product['id'] }})">
+                            {{ in_array($product['id'], $favoriteProductIds, true) ? 'Quitar de favoritos' : 'Agregar a favoritos' }}
+                        </flux:button>
+                    </div>
                 </article>
             @endforeach
         </div>

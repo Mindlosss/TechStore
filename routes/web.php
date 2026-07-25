@@ -10,6 +10,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('products/{productId}', function (int $productId) {
         return view('products.show', ['productId' => $productId]);
     })->whereNumber('productId')->name('products.show');
+    Route::view('favorites', 'favorites.index')->name('favorites.index');
 });
 
 require __DIR__.'/settings.php';
