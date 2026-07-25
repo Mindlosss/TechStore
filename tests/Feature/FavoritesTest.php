@@ -2,9 +2,12 @@
 
 use App\Livewire\Favorites\Index;
 use App\Livewire\Products\Catalog;
+use App\Livewire\Products\Show;
+use App\Mail\FavoriteAdded;
 use App\Models\Favorite;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Livewire;
 
 beforeEach(function () {
@@ -18,6 +21,7 @@ test('guests cannot view favorites', function () {
 
 test('a user can add a product to favorites', function () {
     fakeProductRequests();
+    Mail::fake();
 
     $user = User::factory()->create();
 
@@ -32,10 +36,31 @@ test('a user can add a product to favorites', function () {
         ->product_id->toBe(12)
         ->title->toBe('Classic Black Baseball Cap')
         ->category->toBe('Clothes');
+
+    Mail::assertSent(
+        FavoriteAdded::class,
+        fn (FavoriteAdded $mail): bool => $mail->hasTo($user->email)
+            && $mail->favorite->is($favorite),
+    );
+});
+
+test('adding a favorite from product details sends an email', function () {
+    fakeProductRequests();
+    Mail::fake();
+
+    $user = User::factory()->create();
+
+    Livewire::actingAs($user)
+        ->test(Show::class, ['productId' => 12])
+        ->call('toggleFavorite')
+        ->assertHasNoErrors();
+
+    Mail::assertSent(FavoriteAdded::class, $user->email);
 });
 
 test('a user can remove a product from favorites', function () {
     fakeProductRequests();
+    Mail::fake();
 
     $user = User::factory()->create();
     $favorite = Favorite::factory()->for($user)->create(['product_id' => 12]);
@@ -45,6 +70,7 @@ test('a user can remove a product from favorites', function () {
         ->call('toggleFavorite', 12);
 
     $this->assertModelMissing($favorite);
+    Mail::assertNothingSent();
 });
 
 test('a user only sees and removes their own favorites', function () {

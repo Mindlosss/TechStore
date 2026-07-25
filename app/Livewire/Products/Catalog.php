@@ -2,9 +2,11 @@
 
 namespace App\Livewire\Products;
 
+use App\Mail\FavoriteAdded;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Livewire\Component;
 use Throwable;
 
@@ -43,13 +45,15 @@ class Catalog extends Component
                 ->throw()
                 ->json();
 
-            $user->favorites()->create([
+            $favorite = $user->favorites()->create([
                 'product_id' => $product['id'],
                 'title' => $product['title'],
                 'price' => $product['price'],
                 'image' => $product['images'][0] ?? null,
                 'category' => $product['category']['name'],
             ]);
+
+            Mail::to($user)->send(new FavoriteAdded($favorite));
         } catch (Throwable $exception) {
             report($exception);
             $this->addError('favorite', 'No fue posible actualizar favoritos.');
